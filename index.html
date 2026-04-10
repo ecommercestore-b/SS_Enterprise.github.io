@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CleanCare - Professional Cleaning Store</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Poppins}
+body{background:#050505;color:white}
+
+header{
+position:fixed;
+width:100%;
+top:0;
+background:#000;
+padding:15px 40px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+z-index:1000
+}
+
+.logo{
+color:#00c896;
+font-size:26px;
+font-weight:700
+}
+
+.search{
+padding:8px 15px;
+border-radius:20px;
+border:none;
+width:250px
+}
+
+.cart-btn{
+background:#00c896;
+padding:10px 20px;
+border-radius:20px;
+cursor:pointer
+}
+
+.hero{
+height:80vh;
+background:url('https://images.unsplash.com/photo-1581578731548-c64695cc6952');
+background-size:cover;
+margin-top:70px
+}
+
+.section{padding:70px 40px}
+
+.category-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:20px
+}
+
+.category-card{
+background:#111;
+padding:30px;
+border-radius:12px;
+cursor:pointer;
+text-align:center;
+transition:.3s
+}
+
+.category-card:hover{transform:translateY(-5px)}
+
+.products{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+gap:25px
+}
+
+.product{
+background:#111;
+padding:20px;
+border-radius:12px;
+position:relative
+}
+
+.product img{
+width:100%;
+height:200px;
+object-fit:contain
+}
+
+.badge{
+position:absolute;
+top:10px;
+left:10px;
+background:red;
+padding:5px 10px;
+border-radius:6px
+}
+
+.price{color:#00c896;margin:10px 0}
+
+.qty{
+display:flex;
+justify-content:center;
+margin:10px 0
+}
+
+.qty button{
+padding:5px 12px;
+margin:0 5px
+}
+
+.add-btn{
+background:#00c896;
+padding:10px;
+border:none;
+border-radius:20px;
+width:100%;
+cursor:pointer;
+margin-top:5px
+}
+
+.cart-overlay{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:#0008;
+display:none;
+z-index:9998
+}
+
+.cart{
+position:fixed;
+right:-420px;
+top:0;
+width:380px;
+height:100vh;
+background:#111;
+padding:20px;
+transition:.3s;
+overflow:auto;
+z-index:9999
+}
+
+.cart.active{right:0}
+.cart-overlay.active{display:block}
+
+footer{
+background:#000;
+padding:60px;
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+gap:30px
+}
+
+.footer-title{color:#00c896}
+
+.whatsapp{
+position:fixed;
+bottom:20px;
+right:20px;
+background:#25D366;
+padding:15px;
+border-radius:50%;
+cursor:pointer
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+<div class="logo">CleanCare</div>
+<input class="search" placeholder="Search Cleaning Products" onkeyup="searchProduct(this.value)">
+<div class="cart-btn" onclick="toggleCart()">Cart (<span id="count">0</span>)</div>
+</header>
+
+<section class="hero"></section>
+
+<section class="section">
+<h2>Categories</h2>
+<div class="category-grid">
+<div class="category-card" onclick="filterCategory('floor')">Floor Cleaners</div>
+<div class="category-card" onclick="filterCategory('kitchen')">Kitchen Cleaning</div>
+<div class="category-card" onclick="filterCategory('bathroom')">Bathroom Cleaning</div>
+<div class="category-card" onclick="filterCategory('tools')">Cleaning Tools</div>
+<div class="category-card" onclick="filterCategory('tissue')">Tissue & Paper</div>
+<div class="category-card" onclick="filterCategory('sanitizer')">Sanitizers</div>
+</div>
+</section>
+
+<section class="section">
+<h2>Hot Deals</h2>
+<div class="products" id="hotDeals"></div>
+</section>
+
+<section class="section">
+<h2>Products</h2>
+<div class="products" id="productList"></div>
+</section>
+
+<div class="cart-overlay" id="overlay" onclick="toggleCart()"></div>
+
+<div class="cart" id="cart">
+<h2>Your Cart</h2>
+<div id="cartItems"></div>
+<div id="cartTotal"></div>
+<button class="add-btn" onclick="checkout()">Checkout</button>
+</div>
+
+<footer>
+<div>
+<h3 class="footer-title">CleanCare</h3>
+<p>Professional Cleaning Products</p>
+</div>
+<div>
+<h3 class="footer-title">Support</h3>
+<p>WhatsApp Support</p>
+</div>
+<div>
+<h3 class="footer-title">Contact</h3>
+<p>+91 9999999999</p>
+</div>
+</footer>
+
+<div class="whatsapp" onclick="supportWhatsapp()">💬</div>
+
+<script>
+
+const products=[
+{name:"Floor Cleaner",category:"floor",price:450,discount:350,hot:true,images:["https://i.imgur.com/MN6F1Yk.png"]},
+{name:"Glass Cleaner",category:"kitchen",price:350,discount:280,images:["https://i.imgur.com/w4kG9kR.png"]},
+{name:"Bathroom Cleaner",category:"bathroom",price:400,discount:300,images:["https://i.imgur.com/SHn8WZk.png"]},
+{name:"Spin Mop",category:"tools",price:1200,discount:950,hot:true,images:["https://i.imgur.com/jxWqIBf.png"]},
+{name:"Tissue Paper",category:"tissue",price:200,discount:150,images:["https://i.imgur.com/FYF1dF5.png"]},
+{name:"Surface Sanitizer",category:"sanitizer",price:500,discount:420,images:["https://i.imgur.com/SHn8WZk.png"]}
+]
+
+let cart=[]
+
+const cartEl=document.getElementById("cart")
+const overlayEl=document.getElementById("overlay")
+
+function render(list=products){
+let html=""
+list.forEach((p,i)=>{
+html+=`
+<div class="product">
+${p.hot?'<div class="badge">Hot</div>':''}
+<img src="${p.images[0]}" onclick="openProduct(${i})">
+<h3>${p.name}</h3>
+<div class="price">₹${p.discount}</div>
+<div class="qty">
+<button onclick="qty(-1,${i})">-</button>
+<span id="q${i}">1</span>
+<button onclick="qty(1,${i})">+</button>
+</div>
+<button class="add-btn" onclick="add(${i})">Add to Cart</button>
+</div>
+`
+})
+document.getElementById("productList").innerHTML=html
+}
+
+function renderHot(){
+let html=""
+products.filter(p=>p.hot).forEach(p=>{
+html+=`<div class="product"><img src="${p.images[0]}"><h3>${p.name}</h3></div>`
+})
+document.getElementById("hotDeals").innerHTML=html
+}
+
+function filterCategory(cat){
+render(products.filter(p=>p.category===cat))
+}
+
+function qty(v,i){
+let el=document.getElementById("q"+i)
+el.innerText=Math.max(1,Number(el.innerText)+v)
+}
+
+function add(i){
+let q=Number(document.getElementById("q"+i).innerText)
+for(let k=0;k<q;k++) cart.push(products[i])
+updateCart()
+toggleCart(true)
+}
+
+function updateCart(){
+let html=""
+let subtotal=0
+
+cart.forEach((c,i)=>{
+html+=`<div style="display:flex;justify-content:space-between;margin:10px 0">
+<div>${c.name} ₹${c.discount}</div>
+<button onclick="removeItem(${i})">✕</button>
+</div>`
+subtotal+=c.discount
+})
+
+let tax=Math.round(subtotal*0.05)
+let total=subtotal+tax
+
+document.getElementById("cartItems").innerHTML=html
+
+document.getElementById("cartTotal").innerHTML=
+`Subtotal ₹${subtotal}<br>Tax ₹${tax}<br><b>Total ₹${total}</b>`
+
+document.getElementById("count").innerText=cart.length
+}
+
+function removeItem(i){
+cart.splice(i,1)
+updateCart()
+}
+
+function toggleCart(force){
+if(force){
+cartEl.classList.add("active")
+overlayEl.classList.add("active")
+return
+}
+cartEl.classList.toggle("active")
+overlayEl.classList.toggle("active")
+}
+
+function checkout(){
+let modal=`
+<div id="checkout" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#000c;display:flex;justify-content:center;align-items:center;z-index:99999">
+<div style="background:#111;padding:20px;width:350px">
+<h3>Checkout</h3>
+<input id="name" placeholder="Name" style="width:100%;padding:10px;margin:5px 0">
+<input id="phone" placeholder="Phone" style="width:100%;padding:10px;margin:5px 0">
+<textarea id="address" placeholder="Address" style="width:100%;padding:10px;margin:5px 0"></textarea>
+<button class="add-btn" onclick="placeOrder()">Place Order</button>
+</div>
+</div>`
+
+document.body.insertAdjacentHTML("beforeend",modal)
+}
+
+function placeOrder(){
+let id="CC"+Math.floor(Math.random()*10000)
+let msg=`Order ID:${id}%0A`
+msg+=`Name:${name.value}%0APhone:${phone.value}%0AAddress:${address.value}%0A`
+
+cart.forEach(c=>msg+=`${c.name} ₹${c.discount}%0A`)
+
+window.open(`https://wa.me/919999999999?text=${msg}`)
+}
+
+function searchProduct(val){
+render(products.filter(p=>p.name.toLowerCase().includes(val.toLowerCase())))
+}
+
+function supportWhatsapp(){
+window.open("https://wa.me/919999999999")
+}
+
+function openProduct(i){
+let p=products[i]
+let modal=`
+<div class="cart-overlay active" onclick="this.remove()"></div>
+<div style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#111;padding:20px;width:500px;z-index:99999">
+<img src="${p.images[0]}" style="width:100%;height:300px;object-fit:contain">
+<h3>${p.name}</h3>
+<div class="price">₹${p.discount}</div>
+<button class="add-btn" onclick="add(${i})">Add To Cart</button>
+</div>`
+
+document.body.insertAdjacentHTML("beforeend",modal)
+}
+
+render()
+renderHot()
+
+</script>
+
+</body>
+</html>
